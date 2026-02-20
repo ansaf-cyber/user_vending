@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -113,14 +114,42 @@ class MachineMapProvider extends ChangeNotifier {
         return;
       }
 
-      _userPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 5),
-      );
-      notifyListeners();
+      // Use last known position immediately for a snappy first render
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        _userPosition = lastKnown;
+        notifyListeners();
+      }
+
+      // Use a position stream to get the first available fix.
+      // This avoids the GPS cold-start timeout that plagues getCurrentPosition.
+      try {
+        const locationSettings = LocationSettings(
+          accuracy: LocationAccuracy.medium,
+        );
+
+        final position =
+            await Geolocator.getPositionStream(
+              locationSettings: locationSettings,
+            ).first.timeout(
+              const Duration(seconds: 30),
+              onTimeout: () {
+                // If stream times out, retain last known if we have it
+                if (_userPosition == null) {
+                  log('Location stream timed out with no position.');
+                }
+                throw TimeoutException('Location stream timed out');
+              },
+            );
+
+        _userPosition = position;
+        notifyListeners();
+        log('Location acquired: ${position.latitude}, ${position.longitude}');
+      } on TimeoutException {
+        log('Location timed out. Using last known position if available.');
+      }
     } catch (e) {
       log('Error getting location: $e');
-      // We don't set global _errorMessage here to avoid blocking the map if only location fails
     }
   }
 }

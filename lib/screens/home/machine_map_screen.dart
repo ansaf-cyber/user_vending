@@ -45,7 +45,7 @@ class _MachineMapScreenState extends State<MachineMapScreen>
             position: position,
             infoWindow: InfoWindow(
               title: machine.username,
-              snippet: machine.location ?? 'No address',
+              snippet: machine.location,
             ),
             icon: BitmapDescriptor.defaultMarkerWithHue(
               BitmapDescriptor.hueViolet,
@@ -431,7 +431,7 @@ class _CustomMapAppBar extends StatelessWidget {
             ),
           ),
 
-          _MachineCountCard(count: count, theme: theme),
+         // _MachineCountCard(count: count, theme: theme),
         ],
       ),
     );
