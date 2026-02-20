@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "422893936257",
+    "project_id": "dispense-cabinet",
+    "storage_bucket": "dispense-cabinet.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422893936257:android:fb88ddcaff69543b9a7780",
+        "android_client_info": {
+          "package_name": "cab.vend.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "422893936257-95g3mnatl3mftc7p5o41vicujgk81f3e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cab.vend.app",
+            "certificate_hash": "5b3ff608074b765f2467952f90cd37509d4f304d"
+          }
+        },
+        {
+          "client_id": "422893936257-ja1c0fof9nklq36qren13mj49oloof7j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBITJIyra-jTV6QTLXnS2ji3sulobeRLuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "422893936257-ja1c0fof9nklq36qren13mj49oloof7j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "422893936257-ascm8lk1ckjre5gqqvbtv673ch0m8ndp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "cab.vend.user"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422893936257:android:79e12a2566ab52b79a7780",
+        "android_client_info": {
+          "package_name": "cab.vend.user"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "422893936257-ja1c0fof9nklq36qren13mj49oloof7j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBITJIyra-jTV6QTLXnS2ji3sulobeRLuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "422893936257-ja1c0fof9nklq36qren13mj49oloof7j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "422893936257-ascm8lk1ckjre5gqqvbtv673ch0m8ndp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "cab.vend.user"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
