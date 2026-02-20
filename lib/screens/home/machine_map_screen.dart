@@ -18,17 +18,13 @@ class _MachineMapScreenState extends State<MachineMapScreen>
     with SingleTickerProviderStateMixin {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
-  LatLng? _initialPosition;
-  bool _mapCreated = false;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final provider = context.read<MachineMapProvider>();
-      await provider.fetchMachines();
-      await provider.getCurrentLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MachineMapProvider>().initializedata();
     });
   }
 
@@ -70,21 +66,6 @@ class _MachineMapScreenState extends State<MachineMapScreen>
         _markers = newMarkers;
       });
     }
-
-    if (!_mapCreated && machines.isNotEmpty && _initialPosition == null) {
-      final firstMachineWithLocation = machines.firstWhere(
-        (m) => m.latitude != null && m.longitude != null,
-        orElse: () => machines.first,
-      );
-
-      if (firstMachineWithLocation.latitude != null &&
-          firstMachineWithLocation.longitude != null) {
-        _initialPosition = LatLng(
-          firstMachineWithLocation.latitude!,
-          firstMachineWithLocation.longitude!,
-        );
-      }
-    }
   }
 
   @override
@@ -123,16 +104,14 @@ class _MachineMapScreenState extends State<MachineMapScreen>
                           provider.userPosition!.latitude,
                           provider.userPosition!.longitude,
                         )
-                      : (_initialPosition ??
-                            LatLng(
-                              machinesWithLocation.first.latitude!,
-                              machinesWithLocation.first.longitude!,
-                            )),
+                      : LatLng(
+                          machinesWithLocation.first.latitude!,
+                          machinesWithLocation.first.longitude!,
+                        ),
                   zoom: 13,
                 ),
                 onMapCreated: (controller) {
                   _mapController = controller;
-                  _mapCreated = true;
                 },
                 markers: _markers,
                 myLocationEnabled: true,
@@ -159,7 +138,11 @@ class _MachineMapScreenState extends State<MachineMapScreen>
                 right: 16,
                 child: _MapFloatingButton(
                   icon: HugeIcons.strokeRoundedGps01,
-                  onTap: () {
+                  onTap: () async {
+                    if (provider.userPosition == null) {
+                      await provider.getCurrentLocation();
+                    }
+
                     if (provider.userPosition != null) {
                       _mapController?.animateCamera(
                         CameraUpdate.newLatLng(
@@ -169,8 +152,6 @@ class _MachineMapScreenState extends State<MachineMapScreen>
                           ),
                         ),
                       );
-                    } else {
-                      provider.getCurrentLocation();
                     }
                   },
                   theme: theme,
@@ -214,13 +195,7 @@ class _MachineMapScreenState extends State<MachineMapScreen>
     return Scaffold(
       backgroundColor: theme.primaryBackground,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [theme.primary.withOpacity(0.1), theme.primaryBackground],
-          ),
-        ),
+        decoration: BoxDecoration(),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -230,13 +205,6 @@ class _MachineMapScreenState extends State<MachineMapScreen>
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.primary.withOpacity(0.2),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    ),
-                  ],
                 ),
                 child: CircularProgressIndicator(
                   color: theme.primary,
@@ -310,7 +278,9 @@ class _MachineMapScreenState extends State<MachineMapScreen>
                     label: const Text('Go Back'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.primary,
-                      side: BorderSide(color: theme.primary.withOpacity(0.3)),
+                      side: BorderSide(
+                        color: theme.primary.withValues(alpha: 0.3),
+                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 14,
@@ -358,7 +328,7 @@ class _MachineMapScreenState extends State<MachineMapScreen>
               Container(
                 padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
+                  color: theme.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: HugeIcon(
@@ -490,7 +460,7 @@ class _MapFloatingButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 15,
               offset: const Offset(0, 4),
             ),
@@ -517,7 +487,7 @@ class _MachineCountCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -529,7 +499,7 @@ class _MachineCountCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.1),
+              color: theme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: HugeIcon(

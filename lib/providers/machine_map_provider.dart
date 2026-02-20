@@ -75,39 +75,52 @@ class MachineMapProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      _errorMessage = 'Location services are disabled.';
-      notifyListeners();
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        _errorMessage = 'Location permissions are denied';
-        notifyListeners();
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      _errorMessage = 'Location permissions are permanently denied';
-      notifyListeners();
-      return;
-    }
+  Future<void> initializedata() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
     try {
-      _userPosition = await Geolocator.getCurrentPosition();
+      // Parallel fetch machines and try to get location
+      await Future.wait([fetchMachines(), getCurrentLocation()]);
+    } catch (e) {
+      log("Error during initialization: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        log('Location services are disabled.');
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          log('Location permissions are denied');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        log('Location permissions are permanently denied');
+        return;
+      }
+
+      _userPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 5),
+      );
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Error getting location: $e';
-      notifyListeners();
+      log('Error getting location: $e');
+      // We don't set global _errorMessage here to avoid blocking the map if only location fails
     }
   }
 }
